@@ -11,6 +11,11 @@ x-restart: &restart
     options:
       max-size: '10m'
       max-file: '5'
+  # Memory limit per container — cegah OOM kill di VPS 8GB shared
+  # 12 services × 256MB = ~3GB max, sisain ~5GB buat OS + project lain
+  mem_limit: 256m
+  memswap_limit: 512m
+  cpus: 0.5
 
 services:
   # --- INFRA ---
