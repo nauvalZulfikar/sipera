@@ -1,0 +1,244 @@
+// Sipera rebuild Prisma schema.
+// Awal: subset minimal yang cukup buat modul Identity (Phase 4) + Master (Phase 5).
+// Tabel lain (permohonan, spatial, dst) ditambahin per fase nya.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  nama       String    @db.VarChar(255)
+  username   String?   @unique @db.VarChar(255)
+  email      String?   @unique @db.VarChar(255)
+  noTelp     String    @unique @map("no_telp") @db.VarChar(255)
+  role       String    @db.VarChar(50)
+  password   String
+  foto       String?   @db.VarChar(255)
+  status     String?   @db.VarChar(50)
+  catatan    String?
+  instansi   String?   @db.VarChar(255)
+  blockedAt  DateTime? @map("blocked_at")
+  deletedAt  DateTime? @map("deleted_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Wilayah {
+  id      Int    @id @default(autoincrement()) @map("dis_id")
+  nama    String @map("dis_name") @db.VarChar(255)
+  cityId  Int    @map("city_id")
+
+  @@map("master_district")
+}
+
+model Kelurahan {
+  id        Int    @id @default(autoincrement()) @map("subdis_id")
+  nama      String @map("subdis_name") @db.VarChar(512)
+  wilayahId Int    @map("dis_id")
+
+  @@map("master_subdistrict")
+}
+
+model Kbli {
+  id        Int      @id @default(autoincrement())
+  kode      String   @unique @db.VarChar(10)
+  judul     String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("kbli")
+}
+
+model KategoriZona {
+  id             Int     @id @default(autoincrement())
+  kategori       String  @map("category")
+  subKategori    String? @map("sub_category")
+  subSubKategori String? @map("sub_sub_category")
+  kode           String  @map("code")
+  urutan         Int     @default(0) @map("sort_order")
+
+  @@map("kategori_zona")
+}
+
+// =============================================================
+// Phase A — Sub-entities permohonan
+// =============================================================
+
+model Pemohon {
+  id            Int      @id @default(autoincrement())
+  permohonanId  String   @map("permohonan_id") @db.VarChar(64)
+  nama          String   @db.VarChar(255)
+  nik           String   @db.VarChar(20)
+  npwp          String?  @db.VarChar(30)
+  email         String?  @db.VarChar(255)
+  noTelp        String   @map("no_telp") @db.VarChar(20)
+  alamat        String
+  rt            String   @db.VarChar(10)
+  rw            String   @db.VarChar(10)
+  pekerjaan     String?  @db.VarChar(100)
+  kecamatanId   Int?     @map("kecamatan_id")
+  desaId        Int?     @map("desa_id")
+  jenisPengajuan String  @default("langsung") @map("jenis_pengajuan") @db.VarChar(20)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([permohonanId])
+  @@index([nik])
+  @@map("pemohon")
+}
+
+model Kuasa {
+  id           Int      @id @default(autoincrement())
+  permohonanId String   @map("permohonan_id") @db.VarChar(64)
+  nama         String   @db.VarChar(255)
+  nik          String   @db.VarChar(20)
+  alamat       String
+  noTelp       String   @map("no_telp") @db.VarChar(20)
+  email        String?  @db.VarChar(255)
+  noSuratKuasa String?  @map("no_surat_kuasa") @db.VarChar(100)
+  fileSuratKuasa String? @map("file_surat_kuasa") @db.VarChar(500)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([permohonanId])
+  @@map("kuasa")
+}
+
+model Perusahaan {
+  id              Int      @id @default(autoincrement())
+  permohonanId    String   @map("permohonan_id") @db.VarChar(64)
+  nama            String   @db.VarChar(255)
+  npwp            String?  @db.VarChar(30)
+  nibOss          String?  @map("nib_oss") @db.VarChar(20)
+  alamat          String
+  kbliKode        String?  @map("kbli_kode") @db.VarChar(10)
+  namaUsaha       String?  @map("nama_usaha") @db.VarChar(255)
+  jenisKepemilikan String? @map("jenis_kepemilikan") @db.VarChar(50)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([permohonanId])
+  @@index([nibOss])
+  @@map("perusahaan")
+}
+
+model Lahan {
+  id              Int      @id @default(autoincrement())
+  permohonanId    String   @map("permohonan_id") @db.VarChar(64)
+  lokasi          String
+  rt              String   @db.VarChar(10)
+  rw              String   @db.VarChar(10)
+  kecamatanId     Int?     @map("kecamatan_id")
+  kelurahanId     Int?     @map("kelurahan_id")
+  luas            Float
+  nomorSuratTanah String?  @map("nomor_surat_tanah") @db.VarChar(100)
+  kondisiLahan    String?  @map("kondisi_lahan") @db.VarChar(50)
+  peruntukan      String?  @db.VarChar(100)
+  /// Polygon as GeoJSON string. Will swap to PostGIS geometry in Phase G.
+  polygonGeojson  String?  @map("polygon_geojson")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([permohonanId])
+  @@map("lahan")
+}
+
+model Penguasaan {
+  id              Int      @id @default(autoincrement())
+  permohonanId    String   @map("permohonan_id") @db.VarChar(64)
+  jenisHak        String   @map("jenis_hak") @db.VarChar(50)
+  nomorBukti      String?  @map("nomor_bukti") @db.VarChar(100)
+  tanggalBukti    DateTime? @map("tanggal_bukti")
+  alamatPemilik   String?  @map("alamat_pemilik")
+  namaPemilik     String?  @map("nama_pemilik") @db.VarChar(255)
+  kecamatanId     Int?     @map("kecamatan_id")
+  desaId          Int?     @map("desa_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([permohonanId])
+  @@map("penguasaan")
+}
+
+// =============================================================
+// Phase B — Dokumen Pendukung per Permohonan
+// =============================================================
+
+model DokumenPendukung {
+  id            Int      @id @default(autoincrement())
+  permohonanId  String   @map("permohonan_id") @db.VarChar(64)
+  /// Slot: KTP, KK, SHM, AJB, NIB_OSS, FOTO_LOKASI, IZIN_LAINNYA, REVISI
+  slot          String   @db.VarChar(50)
+  fileName      String   @map("file_name") @db.VarChar(255)
+  storageKey    String   @map("storage_key") @db.VarChar(500)
+  mimeType      String   @map("mime_type") @db.VarChar(100)
+  sizeBytes     Int      @map("size_bytes")
+  sha256        String   @db.VarChar(64)
+  uploadedBy    String?  @map("uploaded_by") @db.VarChar(100)
+  /// Untuk revisi: pointer ke versi sebelumnya, biar history bisa di-traverse
+  replacesId    Int?     @map("replaces_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([permohonanId])
+  @@index([permohonanId, slot])
+  @@map("dokumen_pendukung")
+}
+
+// =============================================================
+// Phase G — RDTR (Rencana Detail Tata Ruang) + ITBX
+// =============================================================
+
+/// RDTR polygon. Geometry disimpan via PostGIS column (Unsupported type — handled via raw SQL).
+/// Schema migration WAJIB tambah: ALTER TABLE rdtr_poly ADD COLUMN geom geometry(MultiPolygon,4326);
+/// + CREATE INDEX rdtr_poly_geom_idx ON rdtr_poly USING GIST(geom);
+model RdtrPoly {
+  id              Int      @id @default(autoincrement())
+  /// Kode zona: R-1, K-2, I-1, RTH-1, dst (match dengan kategori_zona.code)
+  zonaCode        String   @map("zona_code") @db.VarChar(20)
+  /// Nama deskriptif zona
+  zonaName        String   @map("zona_name") @db.VarChar(255)
+  /// Source: 'bappeda-2024-shapefile' atau identifier dataset
+  sourceDataset   String?  @map("source_dataset") @db.VarChar(100)
+  /// JSON metadata tambahan (KDB, KLB, KDH, GSB, ITBX overlay khusus)
+  meta            String?  @db.Text
+  /// Note: kolom `geom` Geometry(MultiPolygon, 4326) di-create via raw SQL migration
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([zonaCode])
+  @@map("rdtr_poly")
+}
+
+/// ITBX matrix: per (zona_prefix, kbli_prefix) → status.
+/// Editable via admin UI tanpa redeploy.
+model ItbxMatrix {
+  id              Int      @id @default(autoincrement())
+  /// Prefix zona, mis. "R-", "K-", "RTH-" (wildcard match)
+  zonaPrefix      String   @map("zona_prefix") @db.VarChar(20)
+  /// Prefix KBLI 2-digit, mis. "41", "47", "10". Kosong = match semua.
+  kbliPrefix      String   @map("kbli_prefix") @db.VarChar(10)
+  /// I=Izin, T=Terbatas, B=Bersyarat, X=Tidak Diizinkan
+  status          String   @db.VarChar(1)
+  /// Catatan dari dinas (mis. "wajib AMDAL", "max 2 lantai")
+  catatan         String?
+  /// Priority kalau ada rule yang overlap (higher wins)
+  priority        Int      @default(0)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  updatedBy       String?  @map("updated_by") @db.VarChar(100)
+
+  @@unique([zonaPrefix, kbliPrefix])
+  @@index([zonaPrefix])
+  @@map("itbx_matrix")
+}

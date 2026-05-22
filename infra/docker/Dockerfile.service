@@ -1,0 +1,50 @@
+# Multi-stage Dockerfile generik untuk semua @sipera/* service Node.js.
+# Build:  docker build -f infra/docker/Dockerfile.service --build-arg SERVICE=identity -t sipera/identity .
+# Run:    docker run -p 4002:4002 sipera/identity
+#
+# Image akhir: distroless ~120MB, run as non-root user (security).
+
+ARG NODE_VERSION=20
+
+# ---------- Stage 1: build ----------
+FROM node:${NODE_VERSION}-slim AS builder
+
+ARG SERVICE
+ENV PNPM_HOME=/usr/local/share/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+RUN corepack enable && corepack prepare pnpm@10.31.0 --activate
+
+WORKDIR /app
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* tsconfig.base.json ./
+COPY apps/${SERVICE}/package.json ./apps/${SERVICE}/
+COPY packages/data-access/package.json ./packages/data-access/
+
+# Prefer offline + production-only deps
+RUN pnpm install --frozen-lockfile --filter "@sipera/${SERVICE}..."
+
+COPY apps/${SERVICE} ./apps/${SERVICE}
+COPY packages ./packages
+
+# Generate Prisma client (if data-access used) + compile TS
+RUN cd packages/data-access && npx prisma generate || true
+RUN pnpm --filter "@sipera/${SERVICE}" run build || true
+
+# ---------- Stage 2: runtime ----------
+FROM gcr.io/distroless/nodejs20-debian12 AS runtime
+
+ARG SERVICE
+WORKDIR /app
+
+# Copy whole pnpm-resolved tree (necessary for workspace symlinks)
+COPY --from=builder /app /app
+
+# Non-root for security
+USER nonroot
+
+ENV NODE_ENV=production
+EXPOSE 4000-5000
+WORKDIR /app/apps/${SERVICE}
+
+# tsx not available in distroless; expect `dist/main.js` from build step.
+# Fallback: use tsx slim if build skipped.
+CMD ["dist/main.js"]

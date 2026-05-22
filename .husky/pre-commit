@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+# Pre-commit gate: lint-staged + typecheck on staged files only (fast).
+# Setup: `pnpm dlx husky init` lalu chmod +x .husky/pre-commit
+
+npx lint-staged

@@ -1,0 +1,37 @@
+# Production Dockerfile generik — pakai tsx runtime (no compile step needed).
+# Build: docker build -f infra/docker/Dockerfile.prod --build-arg SERVICE=identity -t sipera/identity .
+#
+# Hasil: ~250MB per service (node:20-slim + node_modules + source).
+
+ARG NODE_VERSION=20
+FROM node:${NODE_VERSION}-slim AS base
+
+WORKDIR /app
+
+# pnpm via corepack
+RUN corepack enable && corepack prepare pnpm@10.31.0 --activate
+
+# Install deps (cached layer)
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json ./
+COPY apps ./apps
+COPY packages ./packages
+
+RUN pnpm install --frozen-lockfile --prod=false
+
+# Prisma generate (if data-access present)
+RUN cd packages/data-access && npx prisma generate || true
+
+# Runtime — tsx-based, no separate compile step needed
+ARG SERVICE
+ENV SERVICE=${SERVICE}
+ENV NODE_ENV=production
+ENV PORT=4000
+
+EXPOSE 4000
+
+# Healthcheck (curl built-in via wget alternative)
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD curl -f http://localhost:${PORT}/_health || exit 1
+
+CMD pnpm --filter @sipera/${SERVICE} start

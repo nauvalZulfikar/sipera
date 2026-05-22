@@ -1,0 +1,29 @@
+{
+  "name": "@sipera/api-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "build": "tsc",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --max-warnings 0"
+  },
+  "dependencies": {
+    "fastify": "^5.1.0",
+    "@fastify/http-proxy": "^11.0.0",
+    "@fastify/rate-limit": "^10.2.0",
+    "@fastify/jwt": "^9.0.0",
+    "@fastify/cors": "^10.0.0",
+    "pino": "^9.5.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.1.0",
+    "undici": "^7.0.0",
+    "@types/node": "^20.14.0"
+  }
+}

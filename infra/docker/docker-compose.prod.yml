@@ -1,0 +1,185 @@
+name: sipera
+
+# Production stack untuk VPS 72.60.196.21.
+# Domain: sipera.aureonforge.com → reverse proxy host nginx → :8090 (warga FE) / :8091 (dinas FE)
+# Backend services internal only (port 4000-4018), gak expose ke host.
+
+x-restart: &restart
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
+
+services:
+  # --- INFRA ---
+  postgres:
+    <<: *restart
+    image: postgis/postgis:16-3.4
+    container_name: sipera-pg
+    environment:
+      POSTGRES_USER: sipera
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
+      POSTGRES_DB: sipera
+    volumes:
+      - sipera_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U sipera -d sipera']
+      interval: 10s
+      retries: 10
+
+  redis:
+    <<: *restart
+    image: redis:7-alpine
+    container_name: sipera-redis
+    volumes:
+      - sipera_redis:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+
+  # --- BACKEND SERVICES ---
+  identity:
+    <<: *restart
+    image: ghcr.io/nauvalzulfikar/sipera/identity:latest
+    container_name: sipera-identity
+    environment:
+      DATABASE_URL: postgresql://sipera:${POSTGRES_PASSWORD}@postgres:5432/sipera
+      JWT_SECRET: ${JWT_SECRET:?required}
+      JWT_TTL: 86400
+      PORT: 4002
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  master:
+    <<: *restart
+    image: ghcr.io/nauvalzulfikar/sipera/master:latest
+    container_name: sipera-master
+    environment:
+      DATABASE_URL: postgresql://sipera:${POSTGRES_PASSWORD}@postgres:5432/sipera
+      PORT: 4003
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  document:
+    <<: *restart
+    image: ghcr.io/nauvalzulfikar/sipera/document:latest
+    container_name: sipera-document
+    environment:
+      DATABASE_URL: postgresql://sipera:${POSTGRES_PASSWORD}@postgres:5432/sipera
+      PORT: 4006
+      STORAGE_ROOT: /storage
+    volumes:
+      - sipera_storage:/storage
+
+  notification:
+    <<: *restart
+    image: ghcr.io/nauvalzulfikar/sipera/notification:latest
+    container_name: sipera-notification
+    environment:
+      PORT: 4007
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_FROM_NUMBER: ${TWILIO_FROM_NUMBER:-}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+
+  spatial:
+    <<: *restart
+    image: ghcr.io/nauvalzulfikar/sipera/spatial:latest
+    container_name: sipera-spatial
+    environment:
+      DATABASE_URL: postgresql://sipera:${POSTGRES_PASSWORD}@postgres:5432/sipera
+      PORT: 4008
+
+  permohonan:
+    <<: *restart
+    image: ghcr.io/nauvalzulfikar/sipera/permohonan:latest
+    container_name: sipera-permohonan
+    environment:
+      PORT: 4009
+      NOTIFICATION_URL: http://notification:4007
+      DOCUMENT_URL: http://document:4006
+      ADMIN_URL: http://admin:4013
+      ENABLE_SUB_ENTITIES: 'true'
+      EXPIRE_DAYS: 30
+      DATABASE_URL: postgresql://sipera:${POSTGRES_PASSWORD}@postgres:5432/sipera
+
+  reporting:
+    <<: *restart
+    image: ghcr.io/nauvalzulfikar/sipera/reporting:latest
+    container_name: sipera-reporting
+    environment:
+      PORT: 4012
+      PERMOHONAN_URL: http://permohonan:4009
+
+  admin:
+    <<: *restart
+    image: ghcr.io/nauvalzulfikar/sipera/admin:latest
+    container_name: sipera-admin
+    environment:
+      PORT: 4013
+      SETTINGS_FILE: /data/settings.json
+    volumes:
+      - sipera_admin_data:/data
+
+  public-api:
+    <<: *restart
+    image: ghcr.io/nauvalzulfikar/sipera/public-api:latest
+    container_name: sipera-public-api
+    environment:
+      PORT: 4018
+      PERMOHONAN_URL: http://permohonan:4009
+
+  gateway:
+    <<: *restart
+    image: ghcr.io/nauvalzulfikar/sipera/api-gateway:latest
+    container_name: sipera-gateway
+    environment:
+      GATEWAY_PORT: 5200
+      IDENTITY_UPSTREAM_URL: http://identity:4002
+      MASTER_UPSTREAM_URL: http://master:4003
+      PERMOHONAN_UPSTREAM_URL: http://permohonan:4009
+      SPATIAL_UPSTREAM_URL: http://spatial:4008
+      LEGACY_UPSTREAM_URL: http://identity:4002
+      ROUTE_AUTH: new
+      ROUTE_USERS: new
+      ROUTE_WILAYAH: new
+      ROUTE_KBLI: new
+      ROUTE_KATEGORI_ZONA: new
+      ROUTE_PERMOHONAN: new
+      ROUTE_RDTR: new
+      ROUTE_RTRW: new
+      CORS_ORIGINS: 'https://sipera.aureonforge.com,https://admin-sipera.aureonforge.com'
+    ports:
+      - '127.0.0.1:5200:5200' # expose to host nginx only
+    depends_on:
+      - identity
+      - master
+      - permohonan
+      - spatial
+
+  # --- FRONTENDS (nginx-served static) ---
+  frontend-warga:
+    <<: *restart
+    image: ghcr.io/nauvalzulfikar/sipera/frontend-warga:latest
+    container_name: sipera-fe-warga
+    ports:
+      - '127.0.0.1:8090:80'
+
+  frontend-dinas:
+    <<: *restart
+    image: ghcr.io/nauvalzulfikar/sipera/frontend-dinas:latest
+    container_name: sipera-fe-dinas
+    ports:
+      - '127.0.0.1:8091:80'
+
+volumes:
+  sipera_pg:
+  sipera_redis:
+  sipera_storage:
+  sipera_admin_data:
+
+networks:
+  default:
+    name: sipera-prod

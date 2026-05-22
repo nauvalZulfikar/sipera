@@ -1,0 +1,9 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./apps/api-gateway" },
+    { "path": "./apps/identity" },
+    { "path": "./packages/data-access" },
+    { "path": "./packages/contract-tests" }
+  ]
+}

@@ -1,0 +1,187 @@
+{
+  "id": "2bb7d5e4-7027-4331-a823-baf5c7729513",
+  "recordedAt": "2026-05-22T00:39:44.066Z",
+  "request": {
+    "method": "GET",
+    "path": "/wilayah/kecamatan",
+    "query": {},
+    "headers": {
+      "user-agent": "curl/8.14.1",
+      "accept": "*/*"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "x-powered-by": "Express",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "1508",
+      "etag": "W/\"5e4-lXxSt2JtEpPVw7pvUZk1XomLLJE\"",
+      "date": "Fri, 22 May 2026 00:39:44 GMT",
+      "connection": "keep-alive",
+      "keep-alive": "timeout=5"
+    },
+    "body": {
+      "data": [
+        {
+          "dis_id": 1,
+          "dis_name": "Arjasari",
+          "city_id": 1
+        },
+        {
+          "dis_id": 2,
+          "dis_name": "Baleendah",
+          "city_id": 1
+        },
+        {
+          "dis_id": 3,
+          "dis_name": "Banjaran",
+          "city_id": 1
+        },
+        {
+          "dis_id": 4,
+          "dis_name": "Bojongsoang",
+          "city_id": 1
+        },
+        {
+          "dis_id": 5,
+          "dis_name": "Cangkuang",
+          "city_id": 1
+        },
+        {
+          "dis_id": 6,
+          "dis_name": "Cicalengka",
+          "city_id": 1
+        },
+        {
+          "dis_id": 7,
+          "dis_name": "Cikancung",
+          "city_id": 1
+        },
+        {
+          "dis_id": 8,
+          "dis_name": "Cilengkrang",
+          "city_id": 1
+        },
+        {
+          "dis_id": 9,
+          "dis_name": "Cileunyi",
+          "city_id": 1
+        },
+        {
+          "dis_id": 10,
+          "dis_name": "Cimaung",
+          "city_id": 1
+        },
+        {
+          "dis_id": 11,
+          "dis_name": "Cimenyan",
+          "city_id": 1
+        },
+        {
+          "dis_id": 12,
+          "dis_name": "Ciparay",
+          "city_id": 1
+        },
+        {
+          "dis_id": 13,
+          "dis_name": "Ciwidey",
+          "city_id": 1
+        },
+        {
+          "dis_id": 14,
+          "dis_name": "Dayeuhkolot",
+          "city_id": 1
+        },
+        {
+          "dis_id": 15,
+          "dis_name": "Ibun",
+          "city_id": 1
+        },
+        {
+          "dis_id": 16,
+          "dis_name": "Katapang",
+          "city_id": 1
+        },
+        {
+          "dis_id": 17,
+          "dis_name": "Kertasari",
+          "city_id": 1
+        },
+        {
+          "dis_id": 18,
+          "dis_name": "Kutawaringin",
+          "city_id": 1
+        },
+        {
+          "dis_id": 19,
+          "dis_name": "Majalaya",
+          "city_id": 1
+        },
+        {
+          "dis_id": 20,
+          "dis_name": "Margaasih",
+          "city_id": 1
+        },
+        {
+          "dis_id": 21,
+          "dis_name": "Margahayu",
+          "city_id": 1
+        },
+        {
+          "dis_id": 22,
+          "dis_name": "Nagreg",
+          "city_id": 1
+        },
+        {
+          "dis_id": 23,
+          "dis_name": "Pacet",
+          "city_id": 1
+        },
+        {
+          "dis_id": 24,
+          "dis_name": "Pameungpeuk",
+          "city_id": 1
+        },
+        {
+          "dis_id": 25,
+          "dis_name": "Pangalengan",
+          "city_id": 1
+        },
+        {
+          "dis_id": 26,
+          "dis_name": "Paseh",
+          "city_id": 1
+        },
+        {
+          "dis_id": 27,
+          "dis_name": "Pasirjambu",
+          "city_id": 1
+        },
+        {
+          "dis_id": 28,
+          "dis_name": "Rancabali",
+          "city_id": 1
+        },
+        {
+          "dis_id": 29,
+          "dis_name": "Rancaekek",
+          "city_id": 1
+        },
+        {
+          "dis_id": 30,
+          "dis_name": "Solokanjeruk",
+          "city_id": 1
+        },
+        {
+          "dis_id": 31,
+          "dis_name": "Soreang",
+          "city_id": 1
+        }
+      ]
+    },
+    "durationMs": 382
+  }
+}

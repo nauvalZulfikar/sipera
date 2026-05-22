@@ -1,0 +1,59 @@
+name: sipera-rebuild-dev
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: sipera-rb-postgres
+    environment:
+      POSTGRES_USER: sipera
+      POSTGRES_PASSWORD: sipera_dev_pwd
+      POSTGRES_DB: sipera
+    ports:
+      - '5532:5432'
+    volumes:
+      - sipera_rb_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U sipera -d sipera']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: sipera-rb-redis
+    ports:
+      - '6479:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    container_name: sipera-rb-minio
+    command: server /data --console-address ':9001'
+    environment:
+      MINIO_ROOT_USER: sipera
+      MINIO_ROOT_PASSWORD: sipera_dev_pwd
+    ports:
+      - '9100:9000'
+      - '9101:9001'
+    volumes:
+      - sipera_rb_minio:/data
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: sipera-rb-mailhog
+    ports:
+      - '1125:1025' # SMTP
+      - '8125:8025' # Web UI
+
+volumes:
+  sipera_rb_postgres:
+  sipera_rb_minio:

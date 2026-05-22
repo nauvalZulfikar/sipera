@@ -1,0 +1,29 @@
+{
+  "id": "94b6dc94-dd2c-45a0-8200-21f3b91ee7d8",
+  "recordedAt": "2026-05-22T00:39:44.324Z",
+  "request": {
+    "method": "GET",
+    "path": "/api",
+    "query": {},
+    "headers": {
+      "user-agent": "curl/8.14.1",
+      "accept": "*/*"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "x-powered-by": "Express",
+      "access-control-allow-origin": "*",
+      "content-type": "text/html; charset=utf-8",
+      "content-length": "3120",
+      "etag": "W/\"c30-YeptigtmgAeh4L3+3tPWOkwg8WU\"",
+      "date": "Fri, 22 May 2026 00:39:44 GMT",
+      "connection": "keep-alive",
+      "keep-alive": "timeout=5"
+    },
+    "body": "\n<!-- HTML for static distribution bundle build -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Swagger UI</title>\n  <link rel=\"stylesheet\" type=\"text/css\" href=\"./api/swagger-ui.css\" >\n  <link rel=\"icon\" type=\"image/png\" href=\"./api/favicon-32x32.png\" sizes=\"32x32\" /><link rel=\"icon\" type=\"image/png\" href=\"./api/favicon-16x16.png\" sizes=\"16x16\" />\n  <style>\n    html\n    {\n      box-sizing: border-box;\n      overflow: -moz-scrollbars-vertical;\n      overflow-y: scro",
+    "durationMs": 4
+  }
+}

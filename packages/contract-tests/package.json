@@ -1,0 +1,27 @@
+{
+  "name": "@sipera/contract-tests",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "record": "tsx src/recorder/server.ts",
+    "generate": "tsx src/generator/cli.ts",
+    "test": "vitest run --reporter=verbose",
+    "test:watch": "vitest watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --max-warnings 0",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "fastify": "^5.1.0",
+    "@fastify/http-proxy": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.1.0",
+    "@types/node": "^20.14.0",
+    "@vitest/coverage-v8": "^2.1.0",
+    "undici": "^7.0.0"
+  }
+}

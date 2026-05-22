@@ -1,0 +1,96 @@
+name: Build & Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/sipera
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        service:
+          - { name: identity, dockerfile: infra/docker/Dockerfile.prod, kind: backend }
+          - { name: master, dockerfile: infra/docker/Dockerfile.prod, kind: backend }
+          - { name: document, dockerfile: infra/docker/Dockerfile.prod, kind: backend }
+          - { name: notification, dockerfile: infra/docker/Dockerfile.prod, kind: backend }
+          - { name: spatial, dockerfile: infra/docker/Dockerfile.prod, kind: backend }
+          - { name: permohonan, dockerfile: infra/docker/Dockerfile.prod, kind: backend }
+          - { name: reporting, dockerfile: infra/docker/Dockerfile.prod, kind: backend }
+          - { name: admin, dockerfile: infra/docker/Dockerfile.prod, kind: backend }
+          - { name: public-api, dockerfile: infra/docker/Dockerfile.prod, kind: backend }
+          - { name: api-gateway, dockerfile: infra/docker/Dockerfile.prod, kind: backend }
+          - { name: frontend-warga, dockerfile: infra/docker/Dockerfile.frontend, kind: frontend }
+          - { name: frontend-dinas, dockerfile: infra/docker/Dockerfile.frontend, kind: frontend }
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push backend
+        if: matrix.service.kind == 'backend'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.service.dockerfile }}
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/${{ matrix.service.name }}:latest
+            ${{ env.IMAGE_PREFIX }}/${{ matrix.service.name }}:${{ github.sha }}
+          build-args: |
+            SERVICE=${{ matrix.service.name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build & push frontend
+        if: matrix.service.kind == 'frontend'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.service.dockerfile }}
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/${{ matrix.service.name }}:latest
+            ${{ env.IMAGE_PREFIX }}/${{ matrix.service.name }}:${{ github.sha }}
+          build-args: |
+            APP=${{ matrix.service.name }}
+            API_URL=https://sipera.aureonforge.com
+            WS_URL=wss://sipera.aureonforge.com
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /root/projects/sipera
+            git pull origin main
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker compose -f infra/docker/docker-compose.prod.yml pull
+            docker compose -f infra/docker/docker-compose.prod.yml up -d
+            docker image prune -f
+            sleep 8
+            docker compose -f infra/docker/docker-compose.prod.yml ps
