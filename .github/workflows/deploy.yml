@@ -15,7 +15,9 @@ jobs:
     permissions:
       contents: read
       packages: write
+    timeout-minutes: 30
     strategy:
+      fail-fast: false
       matrix:
         service:
           - { name: identity, dockerfile: infra/docker/Dockerfile.prod, kind: backend }
@@ -53,8 +55,9 @@ jobs:
             ${{ env.IMAGE_PREFIX }}/${{ matrix.service.name }}:${{ github.sha }}
           build-args: |
             SERVICE=${{ matrix.service.name }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+          cache-from: type=gha,scope=${{ matrix.service.name }}
+          cache-to: type=gha,scope=${{ matrix.service.name }},mode=max
 
       - name: Build & push frontend
         if: matrix.service.kind == 'frontend'
@@ -70,8 +73,9 @@ jobs:
             APP=${{ matrix.service.name }}
             API_URL=https://sipera.aureonforge.com
             WS_URL=wss://sipera.aureonforge.com
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+          cache-from: type=gha,scope=${{ matrix.service.name }}
+          cache-to: type=gha,scope=${{ matrix.service.name }},mode=max
 
   deploy:
     needs: build-and-push
