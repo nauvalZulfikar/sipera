@@ -37,7 +37,7 @@ echo "[4/6] Prisma generate client..."
 
 echo "[5/6] Seed 5 users (warga + 4 dinas roles)..."
 HASH=$(node -e "const b=require('./apps/identity/node_modules/bcryptjs');console.log(b.hashSync('Masuk123@',10))")
-docker exec sipera-rb-postgres psql -U sipera -d sipera -v ON_ERROR_STOP=1 <<SQL >/dev/null
+docker exec -i sipera-rb-postgres psql -U sipera -d sipera -v ON_ERROR_STOP=1 <<SQL >/dev/null
 INSERT INTO users (nama, no_telp, role, password, status, updated_at) VALUES
   ('Warga Test',     '081234567890', 'warga',    '$HASH', 'active', NOW()),
   ('Admin Dinas',    '081111111111', 'admin',    '$HASH', 'active', NOW()),
