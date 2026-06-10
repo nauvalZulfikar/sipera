@@ -38,3 +38,4 @@ generated/
 *.dump
 *.tar.gz
 .test-settings.json
+graphify-out/
