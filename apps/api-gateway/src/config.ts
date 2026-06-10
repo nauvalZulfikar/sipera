@@ -34,6 +34,20 @@ export interface GatewayConfig {
   cors: { origin: string[] };
 }
 
+/**
+ * Ambil JWT secret. Di production WAJIB di-set lewat env — kalau kosong,
+ * fail-fast (jangan diam-diam pakai secret default yang ada di source code).
+ * Di dev boleh fallback supaya gampang dijalankan lokal.
+ */
+function resolveJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (secret) return secret;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET wajib di-set di production (no fallback)');
+  }
+  return 'dev-only-change-me';
+}
+
 export function loadConfig(): GatewayConfig {
   const legacyUrl = process.env.LEGACY_UPSTREAM_URL ?? 'http://localhost:4001';
   const identityUrl = process.env.IDENTITY_UPSTREAM_URL ?? 'http://localhost:4002';
@@ -115,7 +129,7 @@ export function loadConfig(): GatewayConfig {
         requireAuth: false,
       },
     ],
-    jwtSecret: process.env.JWT_SECRET ?? 'dev-only-change-me',
+    jwtSecret: resolveJwtSecret(),
     rateLimit: {
       max: Number(process.env.RATE_LIMIT_MAX ?? 100),
       timeWindow: process.env.RATE_LIMIT_WINDOW ?? '1 minute',

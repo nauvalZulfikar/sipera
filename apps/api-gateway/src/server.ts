@@ -2,6 +2,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { request as undiciRequest } from 'undici';
 import { loadConfig, type GatewayConfig } from './config.js';
 import { matchRoute, resolveUpstream } from './routing.js';
+import { isAuthorized } from './auth.js';
 
 interface GatewayHandle {
   port: number;
@@ -83,6 +84,14 @@ async function handleRequest(
     res.statusCode = 404;
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({ error: 'no_route', path }));
+    return;
+  }
+
+  // Gerbang auth: route ber-`requireAuth` wajib bawa Bearer JWT valid.
+  if (rule.requireAuth && !isAuthorized(req.headers['authorization'], config.jwtSecret)) {
+    res.statusCode = 401;
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify({ error: 'unauthorized' }));
     return;
   }
 

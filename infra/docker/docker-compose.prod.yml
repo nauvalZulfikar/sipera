@@ -51,6 +51,7 @@ services:
     image: ghcr.io/nauvalzulfikar/sipera/identity:latest
     container_name: sipera-identity
     environment:
+      NODE_ENV: production
       DATABASE_URL: postgresql://sipera:${POSTGRES_PASSWORD}@postgres:5432/sipera
       JWT_SECRET: ${JWT_SECRET:?required}
       JWT_TTL: 86400
@@ -142,6 +143,8 @@ services:
     image: ghcr.io/nauvalzulfikar/sipera/api-gateway:latest
     container_name: sipera-gateway
     environment:
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:?required}
       GATEWAY_PORT: 5200
       IDENTITY_UPSTREAM_URL: http://identity:4002
       MASTER_UPSTREAM_URL: http://master:4003
