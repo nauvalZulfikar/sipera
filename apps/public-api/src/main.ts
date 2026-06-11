@@ -83,7 +83,7 @@ async function main() {
     // Proxy to permohonan service
     const upstream = process.env.PERMOHONAN_URL ?? 'http://localhost:4009';
     const res = await fetch(`${upstream}/permohonan`);
-    return (await res.json()) as unknown;
+    return await res.json();
   });
 
   // Webhook subscriptions

@@ -2,6 +2,8 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { request as undiciRequest } from 'undici';
 import { loadConfig, type GatewayConfig } from './config.js';
 import { matchRoute, resolveUpstream } from './routing.js';
+import { isAuthorized } from './auth.js';
+import { clientIp, createRateLimiter, parseWindowMs, type RateLimiter } from './rate-limit.js';
 
 interface GatewayHandle {
   port: number;
@@ -10,8 +12,12 @@ interface GatewayHandle {
 
 export async function startGateway(): Promise<GatewayHandle> {
   const config = loadConfig();
+  const limiter = createRateLimiter({
+    max: config.rateLimit.max,
+    windowMs: parseWindowMs(config.rateLimit.timeWindow),
+  });
   const server = createServer((req, res) => {
-    void handleRequest(req, res, config).catch((err: unknown) => {
+    void handleRequest(req, res, config, limiter).catch((err: unknown) => {
       console.error('[gateway] handler error:', err);
       if (!res.headersSent) {
         res.statusCode = 500;
@@ -44,6 +50,7 @@ async function handleRequest(
   req: IncomingMessage,
   res: ServerResponse,
   config: GatewayConfig,
+  limiter: RateLimiter,
 ): Promise<void> {
   const url = req.url ?? '/';
   const path = url.split('?')[0] ?? '/';
@@ -83,6 +90,24 @@ async function handleRequest(
     res.statusCode = 404;
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({ error: 'no_route', path }));
+    return;
+  }
+
+  // Rate-limit per IP (fixed window). Cegah brute-force login & abuse.
+  const limit = limiter.check(clientIp(req));
+  if (!limit.allowed) {
+    res.statusCode = 429;
+    res.setHeader('content-type', 'application/json');
+    res.setHeader('retry-after', String(limit.retryAfterSeconds));
+    res.end(JSON.stringify({ error: 'rate_limited', retryAfterSeconds: limit.retryAfterSeconds }));
+    return;
+  }
+
+  // Gerbang auth: route ber-`requireAuth` wajib bawa Bearer JWT valid.
+  if (rule.requireAuth && !isAuthorized(req.headers['authorization'], config.jwtSecret)) {
+    res.statusCode = 401;
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify({ error: 'unauthorized' }));
     return;
   }
 

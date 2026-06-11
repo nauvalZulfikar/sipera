@@ -49,9 +49,9 @@ describe('PemohonRepository', () => {
       alamat: 'Jl A',
       rt: '01',
       rw: '02',
-    } as never);
+    });
     expect(created.id).toBe(1);
-    await repo.update(1, { nama: 'Budi 2' } as never);
+    await repo.update(1, { nama: 'Budi 2' });
     expect(p.pemohon.update).toHaveBeenCalled();
     await repo.delete(1);
     expect(p.pemohon.delete).toHaveBeenCalled();

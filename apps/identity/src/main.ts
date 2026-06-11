@@ -6,6 +6,19 @@ import { OtpService, InMemoryOtpStore } from './otp/otp.service.js';
 import { ConsoleOtpProvider } from './otp/providers.js';
 import { registerRoutes } from './http/routes.js';
 
+/**
+ * Di production JWT_SECRET wajib di-set lewat env — fail-fast kalau kosong
+ * supaya tidak diam-diam pakai secret default yang ada di source code.
+ */
+function resolveJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (secret) return secret;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET wajib di-set di production (no fallback)');
+  }
+  return 'dev-only-change-me';
+}
+
 async function main() {
   const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
   await app.register(cors, { origin: true });
@@ -14,7 +27,7 @@ async function main() {
   const users = new UserRepository(prisma);
   const loginService = new LoginService({
     users,
-    jwtSecret: process.env.JWT_SECRET ?? 'dev-only-change-me',
+    jwtSecret: resolveJwtSecret(),
     jwtTtlSeconds: Number(process.env.JWT_TTL ?? 60 * 60 * 24),
   });
 

@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import {
+import type {
   PemohonRepository,
   KuasaRepository,
   PerusahaanRepository,
