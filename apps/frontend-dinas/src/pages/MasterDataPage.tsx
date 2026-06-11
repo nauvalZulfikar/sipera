@@ -65,7 +65,7 @@ export function MasterDataPage() {
 
       <section style={styles.card}>
         <h3>Tambah Single</h3>
-        <form onSubmit={submit} style={{ display: 'flex', gap: 8 }}>
+        <form onSubmit={(e) => void submit(e)} style={{ display: 'flex', gap: 8 }}>
           <input
             value={kode}
             onChange={(e) => setKode(e.target.value)}

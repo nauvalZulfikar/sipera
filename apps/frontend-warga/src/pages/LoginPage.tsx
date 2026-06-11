@@ -25,7 +25,7 @@ export function LoginPage() {
 
   return (
     <main style={styles.page}>
-      <form onSubmit={submit} style={styles.card}>
+      <form onSubmit={(e) => void submit(e)} style={styles.card}>
         <h1 style={styles.title}>Sipera — Masuk</h1>
         <p style={styles.sub}>Sistem Perizinan Tata Ruang Bandung</p>
 

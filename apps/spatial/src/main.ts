@@ -1,10 +1,11 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { z } from 'zod';
-import { MOCK_ZONA, type Polygon } from './mock-zona.js';
+import { MOCK_ZONA } from './mock-zona.js';
 import { summarizeDecision, ITBX_LABEL } from './itbx.js';
 import { HybridZonaService } from './postgis-zona.js';
 import { HybridItbxService } from './db-itbx.js';
+import type { PrismaClient } from '@sipera/data-access';
 
 const intersectSchema = z.object({
   polygon: z.object({
@@ -28,7 +29,7 @@ async function main() {
   await app.register(cors, { origin: true });
 
   // Lazy-load Prisma. Kalau DB gak available, fallback ke pure mock mode.
-  let prisma: import('@sipera/data-access').PrismaClient | null = null;
+  let prisma: PrismaClient | null = null;
   try {
     const { getPrisma } = await import('@sipera/data-access');
     prisma = getPrisma();
@@ -67,7 +68,7 @@ async function main() {
       reply.code(400);
       return { error: 'validation_error', issues: parsed.error.issues };
     }
-    const zonas = await zonaService.intersect(parsed.data.polygon as Polygon);
+    const zonas = await zonaService.intersect(parsed.data.polygon);
 
     type ItbxStatusLetter = 'I' | 'T' | 'B' | 'X';
     type ItbxResultExt = {

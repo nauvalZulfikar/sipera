@@ -16,7 +16,7 @@ describe('parseWindowMs', () => {
 
 describe('createRateLimiter', () => {
   it('allows up to max then blocks within the window', () => {
-    let t = 1_000;
+    const t = 1_000;
     const rl = createRateLimiter({ max: 3, windowMs: 60_000, now: () => t });
 
     expect(rl.check('ip-a').allowed).toBe(true);
@@ -28,7 +28,7 @@ describe('createRateLimiter', () => {
   });
 
   it('isolates counts per key', () => {
-    let t = 0;
+    const t = 0;
     const rl = createRateLimiter({ max: 1, windowMs: 1_000, now: () => t });
     expect(rl.check('ip-a').allowed).toBe(true);
     expect(rl.check('ip-a').allowed).toBe(false);
