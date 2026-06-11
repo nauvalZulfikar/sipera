@@ -269,7 +269,7 @@ export function WizardPage({ onDone }: { onDone: () => void }) {
               Selanjutnya →
             </button>
           ) : (
-            <button onClick={submit} disabled={submitting} style={styles.btnSubmit}>
+            <button onClick={() => void submit()} disabled={submitting} style={styles.btnSubmit}>
               {submitting ? 'Mengirim...' : '✓ Submit Permohonan'}
             </button>
           )}

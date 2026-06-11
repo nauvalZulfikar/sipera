@@ -52,6 +52,8 @@ export interface OtpServiceDeps {
   ttlSeconds?: number;
   /** Max request per nomor per window (window default 1 jam). */
   maxRequestsPerHour?: number;
+  /** Max percobaan kode salah sebelum OTP dikunci. Default 5. */
+  maxValidateAttempts?: number;
 }
 
 export interface GenerateInput {
@@ -64,17 +66,22 @@ export type GenerateResult =
   | { ok: true; ttlSeconds: number }
   | { ok: false; code: 'rate_limit_exceeded'; retryAfterSeconds: number };
 
-export type ValidateResult = { ok: true } | { ok: false; code: 'expired_or_invalid' };
+export type ValidateResult =
+  | { ok: true }
+  | { ok: false; code: 'expired_or_invalid' }
+  | { ok: false; code: 'locked_out'; retryAfterSeconds: number };
 
 export class OtpService {
   private digits: number;
   private ttlSeconds: number;
   private maxRequestsPerHour: number;
+  private maxValidateAttempts: number;
 
   constructor(private readonly deps: OtpServiceDeps) {
     this.digits = deps.digits ?? 6;
     this.ttlSeconds = deps.ttlSeconds ?? 300;
     this.maxRequestsPerHour = deps.maxRequestsPerHour ?? 5;
+    this.maxValidateAttempts = deps.maxValidateAttempts ?? 5;
   }
 
   async generate(input: GenerateInput): Promise<GenerateResult> {
@@ -93,13 +100,32 @@ export class OtpService {
 
   async validate(noTelp: string, purpose: string, code: string): Promise<ValidateResult> {
     const key = otpKey(noTelp, purpose);
+    const attemptsKey = attemptKey(noTelp, purpose);
+
     const stored = await this.deps.store.get(key);
-    if (!stored || stored !== code) {
+    if (!stored) {
       return { ok: false, code: 'expired_or_invalid' };
     }
-    await this.deps.store.delete(key);
-    return { ok: true };
+
+    if (stored === code) {
+      await this.deps.store.delete(key);
+      await this.deps.store.delete(attemptsKey);
+      return { ok: true };
+    }
+
+    // Kode salah — hitung percobaan dalam window TTL OTP.
+    const attempts = await this.deps.store.incrementCounter(attemptsKey, this.ttlSeconds);
+    if (attempts >= this.maxValidateAttempts) {
+      // Kunci: hapus OTP supaya tidak bisa ditebak lagi sampai minta OTP baru.
+      await this.deps.store.delete(key);
+      return { ok: false, code: 'locked_out', retryAfterSeconds: this.ttlSeconds };
+    }
+    return { ok: false, code: 'expired_or_invalid' };
   }
+}
+
+function attemptKey(noTelp: string, purpose: string): string {
+  return `otp:attempts:${noTelp}:${purpose}`;
 }
 
 function otpKey(noTelp: string, purpose: string): string {

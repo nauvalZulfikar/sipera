@@ -74,6 +74,10 @@ export function registerRoutes(app: FastifyInstance, deps: RouteDeps): void {
       parsed.data.code,
     );
     if (!r.ok) {
+      if (r.code === 'locked_out') {
+        reply.code(429);
+        return { error: 'otp_locked', retryAfter: r.retryAfterSeconds };
+      }
       reply.code(401);
       return { error: 'invalid_otp' };
     }

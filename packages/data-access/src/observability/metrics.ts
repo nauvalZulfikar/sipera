@@ -96,7 +96,11 @@ export class Histogram {
     const key = renderLabels(labels);
     let obs = this.state.observations.get(key);
     if (!obs) {
-      obs = { bucketCounts: new Array(this.state.buckets.length).fill(0), sum: 0, count: 0 };
+      obs = {
+        bucketCounts: new Array<number>(this.state.buckets.length).fill(0),
+        sum: 0,
+        count: 0,
+      };
       this.state.observations.set(key, obs);
     }
     obs.sum += value;

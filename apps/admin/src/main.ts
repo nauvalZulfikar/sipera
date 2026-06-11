@@ -69,7 +69,7 @@ async function main() {
     return e;
   });
 
-  app.get('/audit', async (req) => {
+  app.get('/audit', (req) => {
     const q = req.query as Record<string, string>;
     return {
       data: audit.query({

@@ -155,7 +155,7 @@ export function AdminDashboard() {
           permohonan={selected}
           busy={busy}
           onClose={() => setSelected(null)}
-          onAction={(a, c) => doAction(selected, a, c)}
+          onAction={(a, c) => void doAction(selected, a, c)}
         />
       )}
     </div>

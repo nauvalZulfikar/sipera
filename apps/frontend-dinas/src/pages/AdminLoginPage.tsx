@@ -29,7 +29,7 @@ export function AdminLoginPage() {
 
   return (
     <main style={styles.page}>
-      <form onSubmit={submit} style={styles.card}>
+      <form onSubmit={(e) => void submit(e)} style={styles.card}>
         <h1 style={styles.title}>Sipera — Dashboard Dinas</h1>
         <p style={styles.sub}>Khusus staf Dinas Tata Ruang Bandung</p>
 

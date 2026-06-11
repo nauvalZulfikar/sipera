@@ -159,6 +159,7 @@ services:
     <<: *node-base
     container_name: sipera-rb-gateway
     environment:
+      JWT_SECRET: dev-secret-replace-in-prod # samakan dgn identity agar token tervalidasi
       GATEWAY_PORT: 5200
       LEGACY_UPSTREAM_URL: http://identity:4002 # fallback if legacy unavailable
       IDENTITY_UPSTREAM_URL: http://identity:4002

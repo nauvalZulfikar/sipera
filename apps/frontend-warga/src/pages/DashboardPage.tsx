@@ -67,7 +67,7 @@ export function DashboardPage() {
       <section style={styles.section}>
         <div style={styles.sectionHeader}>
           <h2 style={styles.h2}>Permohonan Saya</h2>
-          <button onClick={createDemo} disabled={creating} style={styles.btnPrimary}>
+          <button onClick={() => void createDemo()} disabled={creating} style={styles.btnPrimary}>
             {creating ? 'Membuat...' : '+ Permohonan Baru'}
           </button>
         </div>

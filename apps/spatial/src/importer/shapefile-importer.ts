@@ -80,8 +80,14 @@ export async function importShapefile(opts: ImportOptions): Promise<ImportResult
         continue;
       }
       const props = feature.properties;
-      const code = String(props[opts.zonaCodeField] ?? '').trim();
-      const name = String(props[opts.zonaNameField] ?? code).trim();
+      const codeRaw = props[opts.zonaCodeField];
+      const code = (
+        typeof codeRaw === 'string' ? codeRaw : typeof codeRaw === 'number' ? String(codeRaw) : ''
+      ).trim();
+      const nameRaw = props[opts.zonaNameField];
+      const name = (
+        typeof nameRaw === 'string' ? nameRaw : typeof nameRaw === 'number' ? String(nameRaw) : code
+      ).trim();
       if (!code) {
         errors.push({ feature: totalFeatures, reason: `missing field "${opts.zonaCodeField}"` });
         skipped++;

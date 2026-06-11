@@ -1,7 +1,8 @@
 import type { FastifyInstance } from 'fastify';
 import { randomUUID } from 'node:crypto';
 import { createHash } from 'node:crypto';
-import { DokumenPendukungRepository, DOKUMEN_SLOTS, type DokumenSlot } from '@sipera/data-access';
+import type { DokumenPendukungRepository } from '@sipera/data-access';
+import { DOKUMEN_SLOTS, type DokumenSlot } from '@sipera/data-access';
 import type { FileStorage } from '../storage/storage.js';
 
 const ALLOWED_MIME = new Set([

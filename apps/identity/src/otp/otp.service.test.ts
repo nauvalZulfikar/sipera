@@ -70,5 +70,41 @@ describe('OtpService.validate', () => {
     await svc.generate({ noTelp: '081', purpose: 'Login' });
     const r = await svc.validate('081', 'Login', '000000');
     expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.code).toBe('expired_or_invalid');
+  });
+
+  it('locks out after maxValidateAttempts wrong tries', async () => {
+    const svc = new OtpService({
+      store: new InMemoryOtpStore(),
+      provider: mockProvider(),
+      maxValidateAttempts: 3,
+    });
+    await svc.generate({ noTelp: '081', purpose: 'Login' });
+    expect((await svc.validate('081', 'Login', '111111')).ok).toBe(false); // 1
+    expect((await svc.validate('081', 'Login', '111111')).ok).toBe(false); // 2
+    const locked = await svc.validate('081', 'Login', '111111'); // 3 -> lock
+    expect(locked.ok).toBe(false);
+    if (!locked.ok) expect(locked.code).toBe('locked_out');
+  });
+
+  it('after lockout the correct code no longer works (OTP wiped)', async () => {
+    const store = new InMemoryOtpStore();
+    const svc = new OtpService({ store, provider: mockProvider(), maxValidateAttempts: 2 });
+    await svc.generate({ noTelp: '081', purpose: 'Login' });
+    const code = (await store.get('otp:081:Login')) as string;
+    await svc.validate('081', 'Login', '111111'); // 1
+    await svc.validate('081', 'Login', '111111'); // 2 -> lock + wipe
+    const r = await svc.validate('081', 'Login', code);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.code).toBe('expired_or_invalid');
+  });
+
+  it('a correct code before the limit succeeds despite earlier wrong tries', async () => {
+    const store = new InMemoryOtpStore();
+    const svc = new OtpService({ store, provider: mockProvider(), maxValidateAttempts: 5 });
+    await svc.generate({ noTelp: '081', purpose: 'Login' });
+    const code = (await store.get('otp:081:Login')) as string;
+    expect((await svc.validate('081', 'Login', '111111')).ok).toBe(false); // 1 wrong
+    expect((await svc.validate('081', 'Login', code)).ok).toBe(true); // correct
   });
 });
