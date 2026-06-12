@@ -24,6 +24,10 @@ services:
     <<: *restart
     image: postgis/postgis:16-3.4
     container_name: sipera-pg
+    mem_limit: 1g
+    memswap_limit: 1g
+    cpus: 0.5
+    shm_size: 256m
     environment:
       POSTGRES_USER: sipera
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
@@ -116,6 +120,8 @@ services:
     <<: *restart
     image: ghcr.io/nauvalzulfikar/sipera/reporting:latest
     container_name: sipera-reporting
+    mem_limit: 512m
+    memswap_limit: 512m
     environment:
       PORT: 4012
       PERMOHONAN_URL: http://permohonan:4009
@@ -142,6 +148,8 @@ services:
     <<: *restart
     image: ghcr.io/nauvalzulfikar/sipera/api-gateway:latest
     container_name: sipera-gateway
+    mem_limit: 512m
+    memswap_limit: 512m
     environment:
       NODE_ENV: production
       JWT_SECRET: ${JWT_SECRET:?required}
@@ -159,6 +167,8 @@ services:
       ROUTE_PERMOHONAN: new
       ROUTE_RDTR: new
       ROUTE_RTRW: new
+      ROUTE_REPORTS: new
+      REPORTING_UPSTREAM_URL: http://reporting:4012
       CORS_ORIGINS: 'https://sipera.aureonforge.com,https://admin-sipera.aureonforge.com'
     ports:
       - '127.0.0.1:5200:5200' # expose to host nginx only
