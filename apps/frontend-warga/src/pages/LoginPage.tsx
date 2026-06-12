@@ -4,8 +4,8 @@ import { useUser } from '../lib/auth-store.js';
 
 export function LoginPage() {
   const { setUser } = useUser();
-  const [noTelp, setNoTelp] = useState('081234567890');
-  const [password, setPassword] = useState('Masuk123@');
+  const [noTelp, setNoTelp] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,8 +56,6 @@ export function LoginPage() {
         <button type="submit" disabled={loading} style={styles.button}>
           {loading ? 'Memproses...' : 'Masuk'}
         </button>
-
-        <p style={styles.hint}>Demo: 081234567890 / Masuk123@</p>
       </form>
     </main>
   );

@@ -4,8 +4,8 @@ import { useUser } from '../lib/auth-store.js';
 
 export function AdminLoginPage() {
   const { setUser } = useUser();
-  const [noTelp, setNoTelp] = useState('081234567890');
-  const [password, setPassword] = useState('Masuk123@');
+  const [noTelp, setNoTelp] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
