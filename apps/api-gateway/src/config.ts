@@ -23,6 +23,12 @@ export interface RouteRule {
   legacyUpstream: string;
   /** Apakah route ini butuh JWT valid. */
   requireAuth: boolean;
+  /**
+   * Kalau di-set, prefix ini dibuang dari path sebelum diteruskan ke upstream.
+   * Dipakai saat service upstream meng-host route TANPA prefix yang dipakai
+   * frontend/gateway (mis. frontend `/rdtr/intersect` → spatial `/intersect`).
+   */
+  stripPrefix?: string;
 }
 
 export interface GatewayConfig {
@@ -54,6 +60,7 @@ export function loadConfig(): GatewayConfig {
   const masterUrl = process.env.MASTER_UPSTREAM_URL ?? 'http://localhost:4003';
   const permohonanUrl = process.env.PERMOHONAN_UPSTREAM_URL ?? 'http://localhost:4009';
   const spatialUrl = process.env.SPATIAL_UPSTREAM_URL ?? 'http://localhost:4008';
+  const reportingUrl = process.env.REPORTING_UPSTREAM_URL ?? 'http://localhost:4012';
 
   return {
     port: Number(process.env.GATEWAY_PORT ?? 3001),
@@ -63,6 +70,7 @@ export function loadConfig(): GatewayConfig {
       master: { name: 'master', url: masterUrl },
       permohonan: { name: 'permohonan', url: permohonanUrl },
       spatial: { name: 'spatial', url: spatialUrl },
+      reporting: { name: 'reporting', url: reportingUrl },
     },
     routes: [
       {
@@ -108,11 +116,30 @@ export function loadConfig(): GatewayConfig {
         requireAuth: true,
       },
       {
+        // Frontend memanggil `/rdtr/intersect`; service spatial meng-host `/intersect`.
+        // Strip `/rdtr` supaya path cocok di upstream baru.
         pattern: '/rdtr/*',
         flagEnv: 'ROUTE_RDTR',
         newUpstream: 'spatial',
         legacyUpstream: 'legacy-vendor',
         requireAuth: false,
+        stripPrefix: '/rdtr',
+      },
+      {
+        // Peta publik + wizard ambil daftar zona langsung dari spatial `/zona`.
+        pattern: '/zona/*',
+        flagEnv: 'ROUTE_RDTR',
+        newUpstream: 'spatial',
+        legacyUpstream: 'legacy-vendor',
+        requireAuth: false,
+      },
+      {
+        // Laporan dinas (summary + export CSV) → service reporting `/reports/*`.
+        pattern: '/reports/*',
+        flagEnv: 'ROUTE_REPORTS',
+        newUpstream: 'reporting',
+        legacyUpstream: 'legacy-vendor',
+        requireAuth: true,
       },
       {
         pattern: '/rtrw/*',

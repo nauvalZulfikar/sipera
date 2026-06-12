@@ -112,7 +112,12 @@ async function handleRequest(
   }
 
   const upstream = resolveUpstream(config, rule, process.env);
-  const targetUrl = `${upstream.url}${url}`;
+  // Buang prefix bila route minta (mis. `/rdtr/intersect` → `/intersect`).
+  const forwardUrl =
+    rule.stripPrefix && url.startsWith(rule.stripPrefix)
+      ? url.slice(rule.stripPrefix.length) || '/'
+      : url;
+  const targetUrl = `${upstream.url}${forwardUrl}`;
   const headers: Record<string, string> = {};
   for (const [key, value] of Object.entries(req.headers)) {
     if (typeof value === 'string') headers[key] = value;

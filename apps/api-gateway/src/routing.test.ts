@@ -60,3 +60,27 @@ describe('resolveUpstream', () => {
     expect(resolveUpstream(cfg, authRule, env).name).toBe('legacy-vendor');
   });
 });
+
+describe('spatial + reporting routes (regression: frontend feature wiring)', () => {
+  const cfg = loadConfig();
+
+  it('exposes /zona and routes it to spatial', () => {
+    const r = matchRoute(cfg.routes, '/zona');
+    expect(r?.newUpstream).toBe('spatial');
+    expect(resolveUpstream(cfg, r!, { ROUTE_RDTR: 'new' }).name).toBe('spatial');
+  });
+
+  it('strips /rdtr prefix so /rdtr/intersect → /intersect on spatial', () => {
+    const r = matchRoute(cfg.routes, '/rdtr/intersect');
+    expect(r?.newUpstream).toBe('spatial');
+    expect(r?.stripPrefix).toBe('/rdtr');
+  });
+
+  it('routes /reports/* to reporting upstream (auth required)', () => {
+    const r = matchRoute(cfg.routes, '/reports/summary');
+    expect(r?.newUpstream).toBe('reporting');
+    expect(r?.requireAuth).toBe(true);
+    expect(cfg.upstreams.reporting).toBeDefined();
+    expect(resolveUpstream(cfg, r!, { ROUTE_REPORTS: 'new' }).name).toBe('reporting');
+  });
+});
