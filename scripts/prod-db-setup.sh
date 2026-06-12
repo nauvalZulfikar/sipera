@@ -10,11 +10,13 @@ PG=$(docker ps --format '{{.Names}}' | grep -iE 'pg|postgres|postgis' | head -1)
 NET=$(docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' "$PG" | awk '{print $1}')
 echo "[i] postgres container=$PG  network=$NET"
 
-echo "[1/3] prisma db push (create tables + PostGIS)..."
-docker run --rm --network "$NET" \
+echo "[1/3] generate schema SQL offline + apply via psql..."
+docker run --rm \
   -v "$PWD/packages/data-access:/da" -w /da \
-  -e DATABASE_URL="postgresql://sipera:$PW@$PG:5432/sipera?schema=public" \
-  node:20-slim sh -c "npx -y prisma@5.22.0 db push --skip-generate --accept-data-loss"
+  node:20 sh -c "npx -y prisma@5.22.0 migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script" \
+  > /tmp/sipera-schema.sql
+echo "    generated $(wc -l < /tmp/sipera-schema.sql) lines of SQL"
+docker exec -i "$PG" psql -U sipera -d sipera -v ON_ERROR_STOP=1 < /tmp/sipera-schema.sql
 
 echo "[2/3] compute bcrypt hash for Masuk123@ ..."
 HASH=$(docker run --rm node:20-slim sh -c "npm i -s bcryptjs@2 >/dev/null 2>&1 && node -e \"console.log(require('bcryptjs').hashSync('Masuk123@',10))\"")
