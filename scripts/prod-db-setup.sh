@@ -6,14 +6,14 @@ set -euo pipefail
 cd /root/projects/sipera
 
 PW=$(grep ^POSTGRES_PASSWORD= infra/docker/.env | cut -d= -f2)
-PG=$(docker ps --format '{{.Names}}' | grep -i postgres | head -1)
+PG=$(docker ps --format '{{.Names}}' | grep -iE 'pg|postgres|postgis' | head -1)
 NET=$(docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' "$PG" | awk '{print $1}')
 echo "[i] postgres container=$PG  network=$NET"
 
 echo "[1/3] prisma db push (create tables + PostGIS)..."
 docker run --rm --network "$NET" \
   -v "$PWD/packages/data-access:/da" -w /da \
-  -e DATABASE_URL="postgresql://sipera:$PW@postgres:5432/sipera?schema=public" \
+  -e DATABASE_URL="postgresql://sipera:$PW@$PG:5432/sipera?schema=public" \
   node:20-slim sh -c "npx -y prisma@5.22.0 db push --skip-generate --accept-data-loss"
 
 echo "[2/3] compute bcrypt hash for Masuk123@ ..."
