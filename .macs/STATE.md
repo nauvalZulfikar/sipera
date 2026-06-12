@@ -37,3 +37,15 @@ blocked: "SSL admin-sipera waits on user DNS repoint at Hostinger (no DNS API ac
 persisted: [apps/frontend-warga/src/pages/LoginPage.tsx, apps/frontend-dinas/src/pages/AdminLoginPage.tsx, scripts/prod-setup-admin-vhost.sh]
 
 ---
+
+---
+
+ts: 2026-06-12T18:35:00+07:00
+turn: done, wait for hostinger (DNS admin-sipera)
+status:
+done: "Dinas migration COMPLETE. DNS admin-sipera→72.61.101.167 (user), SSL via certbot (Let's Encrypt exp 2026-09-10, http→https redirect). Verified: HTTPS 200 'Sipera — Dashboard Dinas', admin login 081111111111 → 200, demo-prefill blank (browser screenshot run-1781267496). Warga + Dinas both fully live on new server with HTTPS + demo hidden."
+next: "Optional: secure demo dinas accounts (rotate/disable) before real staff use; clean orphaned sipera-dinas stack on old server (do NOT decommission old server — hosts shakaai etc.)."
+blocked: "—"
+persisted: []
+
+---
