@@ -61,3 +61,15 @@ blocked: "—"
 persisted: [apps/frontend-warga/src/lib/auth-store.ts, apps/frontend-dinas/src/lib/auth-store.ts, scripts/prod-fix-spa-cache.sh]
 
 ---
+
+---
+
+ts: 2026-06-12T20:30:00+07:00
+turn: login admin-siperanya msh error
+status:
+done: "FIXED dinas login 'Failed to fetch': frontend images baked API_URL=warga-domain → dinas fetched cross-origin → CSP blocked. Fix: build with empty API_URL/WS_URL → relative same-origin; NotifBell derives ws from location (commit 6f3a848). Deployed. Verified via Playwright: dinas admin login → 201 on admin-sipera origin → dashboard 'Semua Permohonan' (/tmp/dinas_result.png); warga no regression (LOGGED_IN_DASHBOARD)."
+next: "Optional: fix /ws/notifikasi 502; patch dinas vhost SPA cache; bump 120m anchor; sync nginx template to repo."
+blocked: "—"
+persisted: [.github/workflows/deploy.yml, apps/frontend-warga/src/components/NotifBell.tsx]
+
+---
