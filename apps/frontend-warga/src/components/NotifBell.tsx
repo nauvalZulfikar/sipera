@@ -8,9 +8,13 @@ interface NotifMessage {
   read: boolean;
 }
 
+// Same-origin by default: derive ws(s)://<current host> so each domain
+// (warga / dinas) talks to its own gateway. Falls back to dev only off-browser.
 const WS_BASE =
-  (import.meta as unknown as { env?: { VITE_WS_URL?: string } }).env?.VITE_WS_URL ??
-  'ws://localhost:4007';
+  (import.meta as unknown as { env?: { VITE_WS_URL?: string } }).env?.VITE_WS_URL ||
+  (typeof window !== 'undefined'
+    ? `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`
+    : 'ws://localhost:4007');
 
 /**
  * Bell icon dengan badge count + dropdown list notif.
