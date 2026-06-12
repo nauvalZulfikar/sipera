@@ -25,3 +25,15 @@ blocked: "—"
 persisted: [apps/api-gateway/src/config.ts, apps/api-gateway/src/server.ts, apps/api-gateway/src/routing.test.ts, infra/docker/docker-compose.prod.yml, infra/nginx/sipera.aureonforge.com.conf, scripts/prod-deploy-gateway.sh, scripts/prod-bump-gateway-mem.sh, scripts/prod-bump-reporting-mem.sh, scripts/prod-fix-csp-map.sh]
 
 ---
+
+---
+
+ts: 2026-06-12T17:30:00+07:00
+turn: sembunyikan demo, kasih creds demo, pindahin halaman dinas (admin) ke server baru
+status:
+done: "Demo hidden from login (warga+dinas: cleared prefill + removed hint, commit 26c87be, deployed, browser-verified blank form). Demo creds handed to user. Dinas migrated to new server: nginx vhost admin-sipera→:8091+gateway installed & verified (dinas HTML + admin login 200 via Host header)."
+next: "User repoints DNS admin-sipera A → 72.61.101.167 in Hostinger; then I run certbot for SSL. (vhost is HTTP-only until DNS moves.)"
+blocked: "SSL admin-sipera waits on user DNS repoint at Hostinger (no DNS API access)."
+persisted: [apps/frontend-warga/src/pages/LoginPage.tsx, apps/frontend-dinas/src/pages/AdminLoginPage.tsx, scripts/prod-setup-admin-vhost.sh]
+
+---
