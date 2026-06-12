@@ -49,3 +49,15 @@ blocked: "—"
 persisted: []
 
 ---
+
+---
+
+ts: 2026-06-12T19:40:00+07:00
+turn: sipera login warga pas submit gaada perubahan, gua restart baru berubah
+status:
+done: "FIXED warga login 'no nav until reload': auth-store useUser() had per-component useState → App shell never saw LoginPage setUser. Replaced with shared module store via useSyncExternalStore (warga+dinas, commit 1be5aa6). Deployed (new bundle BxhNlbS4). Verified DETERMINISTICALLY via Playwright (venv python): click Masuk → dashboard 'Permohonan Saya' without reload (/tmp/login_result.png). Also fixed SPA cache (index.html no-cache) via prod-fix-spa-cache.sh."
+next: "Optional: fix NotifBell ws /ws/notifikasi 502; patch dinas vhost SPA cache; bump 120m anchor before traffic; sync nginx template to repo."
+blocked: "—"
+persisted: [apps/frontend-warga/src/lib/auth-store.ts, apps/frontend-dinas/src/lib/auth-store.ts, scripts/prod-fix-spa-cache.sh]
+
+---
