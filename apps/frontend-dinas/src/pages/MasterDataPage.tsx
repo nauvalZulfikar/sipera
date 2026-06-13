@@ -12,7 +12,7 @@ interface KbliList {
   meta: { page: number; perPage: number; total: number };
 }
 
-export function MasterDataPage() {
+export function MasterDataPage({ token }: { token: string }) {
   const [list, setList] = useState<Kbli[]>([]);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState('');
@@ -21,13 +21,19 @@ export function MasterDataPage() {
   const [kode, setKode] = useState('');
   const [judul, setJudul] = useState('');
   const [csv, setCsv] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   async function reload() {
     const q = new URLSearchParams({ page: String(page), per_page: '20' });
     if (search) q.set('search', search);
-    const r = await api<KbliList>(`/kbli?${q}`);
-    setList(r.data);
-    setTotal(r.meta.total);
+    try {
+      const r = await api<KbliList>(`/kbli?${q}`, { token });
+      setList(r.data);
+      setTotal(r.meta.total);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'load failed');
+    }
   }
 
   useEffect(() => {
@@ -38,10 +44,12 @@ export function MasterDataPage() {
     e.preventDefault();
     setCreating(true);
     try {
-      await api('/kbli', { method: 'POST', body: { kode, judul } });
+      await api('/kbli', { method: 'POST', body: { kode, judul }, token });
       setKode('');
       setJudul('');
       await reload();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'simpan gagal');
     } finally {
       setCreating(false);
     }
@@ -49,19 +57,28 @@ export function MasterDataPage() {
 
   async function bulkImport() {
     if (!csv) return;
-    const r = await api<{
-      inserted: number;
-      updated: number;
-      errors: { line: number; reason: string }[];
-    }>('/kbli/bulk-import', { method: 'POST', body: { csv } });
-    alert(`Inserted: ${r.inserted}, Updated: ${r.updated}, Errors: ${r.errors.length}`);
-    setCsv('');
-    await reload();
+    try {
+      const r = await api<{
+        inserted: number;
+        updated: number;
+        errors: { line: number; reason: string }[];
+      }>('/kbli/bulk-import', { method: 'POST', body: { csv }, token });
+      alert(`Inserted: ${r.inserted}, Updated: ${r.updated}, Errors: ${r.errors.length}`);
+      setCsv('');
+      await reload();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'import gagal');
+    }
   }
 
   return (
     <div style={{ padding: 24, fontFamily: 'system-ui, sans-serif' }}>
       <h2>Master Data — KBLI</h2>
+      {error && (
+        <div style={{ padding: 12, background: '#fee2e2', color: '#991b1b', borderRadius: 6 }}>
+          {error}
+        </div>
+      )}
 
       <section style={styles.card}>
         <h3>Tambah Single</h3>

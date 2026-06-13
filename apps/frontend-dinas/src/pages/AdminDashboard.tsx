@@ -2,6 +2,15 @@ import { useEffect, useState } from 'react';
 import type { Permohonan } from '../lib/api.js';
 import { dinasApi } from '../lib/dinas-api.js';
 import { useUser } from '../lib/auth-store.js';
+import { MasterDataPage } from './MasterDataPage.js';
+import { ReportsPage } from './ReportsPage.js';
+
+type Section = 'permohonan' | 'master' | 'laporan';
+const SECTIONS: { key: Section; label: string }[] = [
+  { key: 'permohonan', label: '📋 Permohonan' },
+  { key: 'laporan', label: '📊 Laporan' },
+  { key: 'master', label: '🗂️ Master Data' },
+];
 
 const STATUS_COLORS: Record<string, string> = {
   Baru: '#64748b',
@@ -17,6 +26,7 @@ const FILTERS = ['Semua', 'Baru', 'Verifikasi', 'Revisi', 'Disetujui', 'Ditolak'
 
 export function AdminDashboard() {
   const { user, setUser } = useUser();
+  const [section, setSection] = useState<Section>('permohonan');
   const [list, setList] = useState<Permohonan[]>([]);
   const [filter, setFilter] = useState('Semua');
   const [selected, setSelected] = useState<Permohonan | null>(null);
@@ -69,21 +79,40 @@ export function AdminDashboard() {
         <h1 style={styles.sidebarTitle}>Sipera</h1>
         <p style={styles.sidebarSub}>Admin Dinas</p>
         <nav style={styles.nav}>
-          {FILTERS.map((f) => (
+          {SECTIONS.map((s) => (
             <button
-              key={f}
-              onClick={() => setFilter(f)}
+              key={s.key}
+              onClick={() => setSection(s.key)}
               style={{
                 ...styles.navItem,
-                ...(filter === f ? styles.navItemActive : {}),
+                ...(section === s.key ? styles.navItemActive : {}),
               }}
             >
-              {f}
-              {f !== 'Semua' && counts[f] !== undefined && (
-                <span style={styles.navCount}>{counts[f]}</span>
-              )}
+              {s.label}
             </button>
           ))}
+
+          {section === 'permohonan' && (
+            <>
+              <div style={styles.navDivider}>Filter status</div>
+              {FILTERS.map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  style={{
+                    ...styles.navItem,
+                    ...styles.navSubItem,
+                    ...(filter === f ? styles.navItemActive : {}),
+                  }}
+                >
+                  {f}
+                  {f !== 'Semua' && counts[f] !== undefined && (
+                    <span style={styles.navCount}>{counts[f]}</span>
+                  )}
+                </button>
+              ))}
+            </>
+          )}
         </nav>
         <div style={styles.userBox}>
           <strong>{user.nama}</strong>
@@ -94,63 +123,75 @@ export function AdminDashboard() {
         </div>
       </aside>
 
-      <main style={styles.main}>
-        <header style={styles.header}>
-          <h2 style={styles.h2}>{filter === 'Semua' ? 'Semua Permohonan' : filter}</h2>
-          <button onClick={() => void refresh()} style={styles.refreshBtn}>
-            ↻ Refresh
-          </button>
-        </header>
+      {section === 'master' && (
+        <main style={styles.main}>
+          <MasterDataPage token={user.api_token} />
+        </main>
+      )}
+      {section === 'laporan' && (
+        <main style={styles.main}>
+          <ReportsPage token={user.api_token} />
+        </main>
+      )}
+      {section === 'permohonan' && (
+        <main style={styles.main}>
+          <header style={styles.header}>
+            <h2 style={styles.h2}>{filter === 'Semua' ? 'Semua Permohonan' : filter}</h2>
+            <button onClick={() => void refresh()} style={styles.refreshBtn}>
+              ↻ Refresh
+            </button>
+          </header>
 
-        {error && <div style={styles.errorBar}>{error}</div>}
-        {loading && <p style={styles.muted}>Memuat...</p>}
+          {error && <div style={styles.errorBar}>{error}</div>}
+          {loading && <p style={styles.muted}>Memuat...</p>}
 
-        <div style={styles.tableWrap}>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.th}>Nomor</th>
-                <th style={styles.th}>Pemohon</th>
-                <th style={styles.th}>Jenis</th>
-                <th style={styles.th}>Status</th>
-                <th style={styles.th}>Dibuat</th>
-                <th style={styles.th}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {list.map((p) => (
-                <tr key={p.id} style={styles.tr}>
-                  <td style={styles.td}>
-                    <strong>{p.nomor}</strong>
-                  </td>
-                  <td style={styles.td}>{p.namaPemohon}</td>
-                  <td style={styles.td}>{p.jenisIzin}</td>
-                  <td style={styles.td}>
-                    <span style={{ ...styles.badge, background: STATUS_COLORS[p.status] }}>
-                      {p.status}
-                    </span>
-                  </td>
-                  <td style={styles.td}>{new Date(p.createdAt).toLocaleDateString('id-ID')}</td>
-                  <td style={styles.td}>
-                    <button onClick={() => setSelected(p)} style={styles.viewBtn}>
-                      Detail
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {list.length === 0 && !loading && (
+          <div style={styles.tableWrap}>
+            <table style={styles.table}>
+              <thead>
                 <tr>
-                  <td colSpan={6} style={{ ...styles.td, textAlign: 'center', color: '#64748b' }}>
-                    Tidak ada permohonan.
-                  </td>
+                  <th style={styles.th}>Nomor</th>
+                  <th style={styles.th}>Pemohon</th>
+                  <th style={styles.th}>Jenis</th>
+                  <th style={styles.th}>Status</th>
+                  <th style={styles.th}>Dibuat</th>
+                  <th style={styles.th}></th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </main>
+              </thead>
+              <tbody>
+                {list.map((p) => (
+                  <tr key={p.id} style={styles.tr}>
+                    <td style={styles.td}>
+                      <strong>{p.nomor}</strong>
+                    </td>
+                    <td style={styles.td}>{p.namaPemohon}</td>
+                    <td style={styles.td}>{p.jenisIzin}</td>
+                    <td style={styles.td}>
+                      <span style={{ ...styles.badge, background: STATUS_COLORS[p.status] }}>
+                        {p.status}
+                      </span>
+                    </td>
+                    <td style={styles.td}>{new Date(p.createdAt).toLocaleDateString('id-ID')}</td>
+                    <td style={styles.td}>
+                      <button onClick={() => setSelected(p)} style={styles.viewBtn}>
+                        Detail
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {list.length === 0 && !loading && (
+                  <tr>
+                    <td colSpan={6} style={{ ...styles.td, textAlign: 'center', color: '#64748b' }}>
+                      Tidak ada permohonan.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </main>
+      )}
 
-      {selected && (
+      {section === 'permohonan' && selected && (
         <DetailPanel
           permohonan={selected}
           busy={busy}
@@ -299,6 +340,14 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
   },
   navItemActive: { background: '#1e293b', color: '#60a5fa', fontWeight: 600 },
+  navSubItem: { paddingLeft: 24, fontSize: 13 },
+  navDivider: {
+    fontSize: 10,
+    textTransform: 'uppercase',
+    color: '#475569',
+    padding: '12px 12px 4px',
+    letterSpacing: 0.5,
+  },
   navCount: {
     background: '#334155',
     color: '#cbd5e1',

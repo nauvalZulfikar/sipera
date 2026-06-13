@@ -18,15 +18,35 @@ const COLORS: Record<string, string> = {
   Selesai: '#1e3a8a',
 };
 
-export function ReportsPage() {
+export function ReportsPage({ token }: { token: string }) {
   const [data, setData] = useState<Summary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api<Summary>('/reports/summary')
+    api<Summary>('/reports/summary', { token })
       .then(setData)
       .catch((e: unknown) => setError(e instanceof Error ? e.message : 'load failed'));
-  }, []);
+  }, [token]);
+
+  async function exportCsv() {
+    try {
+      const BASE =
+        (import.meta as unknown as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? '';
+      const res = await fetch(`${BASE}/reports/export.csv`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error(`export ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'laporan-permohonan.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'export gagal');
+    }
+  }
 
   if (error) return <div style={{ padding: 24, color: '#dc2626' }}>{error}</div>;
   if (!data) return <div style={{ padding: 24 }}>Memuat...</div>;
@@ -112,9 +132,12 @@ export function ReportsPage() {
       </table>
 
       <p style={{ marginTop: 32 }}>
-        <a href="/reports/export.csv" style={styles.exportBtn}>
+        <button
+          onClick={() => void exportCsv()}
+          style={{ ...styles.exportBtn, border: 'none', cursor: 'pointer' }}
+        >
           📥 Export CSV
-        </a>
+        </button>
       </p>
     </div>
   );
