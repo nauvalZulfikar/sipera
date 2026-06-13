@@ -98,8 +98,12 @@ export function ZonaMap({
     if (mapRef.current) return; // already initialized
 
     const map = L.map(containerRef.current, { center, zoom });
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    // Use the subdomained host ({s}=a/b/c) so it matches the CSP allow-list
+    // `https://*.tile.openstreetmap.org` — the bare host is NOT covered by the
+    // wildcard and was being blocked, leaving the map grey.
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap',
+      subdomains: 'abc',
       maxZoom: 19,
     }).addTo(map);
     mapRef.current = map;

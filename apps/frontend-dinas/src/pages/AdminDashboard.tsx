@@ -51,6 +51,18 @@ export function AdminDashboard() {
     void refresh();
   }, [filter, user]);
 
+  async function openDetail(p: Permohonan) {
+    if (!user) return;
+    // Show immediately, then enrich with availableActions from the by-id endpoint.
+    setSelected(p);
+    try {
+      const full = await dinasApi.byId(p.id, user.api_token);
+      setSelected(full);
+    } catch {
+      // keep the list item; action buttons just won't show
+    }
+  }
+
   async function doAction(
     p: Permohonan,
     action: 'mulai-verifikasi' | 'setujui' | 'tolak' | 'minta-revisi' | 'selesaikan',
@@ -172,7 +184,7 @@ export function AdminDashboard() {
                     </td>
                     <td style={styles.td}>{new Date(p.createdAt).toLocaleDateString('id-ID')}</td>
                     <td style={styles.td}>
-                      <button onClick={() => setSelected(p)} style={styles.viewBtn}>
+                      <button onClick={() => void openDetail(p)} style={styles.viewBtn}>
                         Detail
                       </button>
                     </td>

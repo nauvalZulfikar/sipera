@@ -9,6 +9,9 @@ export const dinasApi = {
         token,
       },
     ),
+  // List items don't carry availableActions — fetch the full record for the
+  // detail panel so the action buttons (verifikasi/setujui/tolak/…) render.
+  byId: (id: string, token: string) => api<Permohonan>(`/permohonan/${id}`, { token }),
   act: (
     id: string,
     action:
