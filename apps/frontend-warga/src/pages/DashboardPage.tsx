@@ -13,12 +13,11 @@ const STATUS_COLORS: Record<string, string> = {
   Kadaluarsa: '#94a3b8',
 };
 
-export function DashboardPage() {
+export function DashboardPage({ onNew }: { onNew: () => void }) {
   const { user, setUser } = useUser();
   const [list, setList] = useState<Permohonan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -28,22 +27,6 @@ export function DashboardPage() {
       .catch((e: unknown) => setError(e instanceof Error ? e.message : 'load failed'))
       .finally(() => setLoading(false));
   }, [user]);
-
-  async function createDemo() {
-    if (!user) return;
-    setCreating(true);
-    try {
-      const p = await permohonan.create(
-        { pemohonId: user.id, namaPemohon: user.nama, jenisIzin: 'KKPR' },
-        user.api_token,
-      );
-      setList((prev) => [p, ...prev]);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'create failed');
-    } finally {
-      setCreating(false);
-    }
-  }
 
   if (!user) return null;
 
@@ -67,8 +50,8 @@ export function DashboardPage() {
       <section style={styles.section}>
         <div style={styles.sectionHeader}>
           <h2 style={styles.h2}>Permohonan Saya</h2>
-          <button onClick={() => void createDemo()} disabled={creating} style={styles.btnPrimary}>
-            {creating ? 'Membuat...' : '+ Permohonan Baru'}
+          <button onClick={onNew} style={styles.btnPrimary}>
+            + Permohonan Baru
           </button>
         </div>
 

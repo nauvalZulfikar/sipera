@@ -70,7 +70,7 @@ function App() {
   return (
     <>
       {langFab}
-      <DashboardPage />
+      <DashboardPage onNew={() => setView('wizard')} />
     </>
   );
 }
