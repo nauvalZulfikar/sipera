@@ -1,5 +1,6 @@
 /** Thin API client untuk backend gateway. */
 /// <reference types="vite/client" />
+import { setUser } from './auth-store.js';
 const BASE =
   (import.meta as unknown as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ??
   'http://localhost:5200';
@@ -27,7 +28,16 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
   const res = await fetch(`${BASE}${path}`, init);
   const text = await res.text();
   const json: unknown = text ? JSON.parse(text) : null;
-  if (!res.ok) throw new ApiError(res.status, json);
+  if (!res.ok) {
+    // A 401 on an authenticated request means the session token expired or is
+    // invalid. Drop the session so the app falls back to the login screen
+    // instead of showing the user a raw "API 401" banner on the dashboard.
+    // The login call itself (/auth/*) is exempt — its 401 is wrong-credentials.
+    if (res.status === 401 && opts.token && !path.startsWith('/auth/')) {
+      setUser(null);
+    }
+    throw new ApiError(res.status, json);
+  }
   return json as T;
 }
 
