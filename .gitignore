@@ -39,3 +39,9 @@ generated/
 *.tar.gz
 .test-settings.json
 graphify-out/
+
+# Merged external assets (from "New Volume", 2026-06-16) — large binaries, tracked via docs/MERGED-ASSETS.md not git
+/reference/legacy-vendor-obfuscated/
+/data/zonasi-pola-ruang/Geojson_SIPERA/*.json
+/data/zonasi-pola-ruang/Geojson_SIPERA/*.mxd
+/data/zonasi-pola-ruang/Geojson_SIPERA/*.pdf

@@ -1,0 +1,52 @@
+Catatan: Nilai di bawah diambil berdasarkan standar legal-formal dokumen Permen ATR/BPN No. 11 Tahun 2023.
+
+* WARNA POLA RUANG_SIPERA
+1. Badan Air = RGB(151, 219, 242)
+2. Badan Jalan = RGB(235, 30, 30)
+3. Cagar Alam = RGB(70, 70, 165)
+4. Kawasan Hortikultura = RGB(230, 255, 75)
+5. Kawasan Hutan Lindung = RGB(50, 95, 40)
+6. Kawasan Hutan Produksi Terbatas = Kode RGB(115, 178, 115)
+7. Kawasan Hutan Produksi Tetap = RGB(125, 180, 55)
+8. Kawasan Pariwisata = RGB(255, 165, 255)
+9. Kawasan Pembangkitan Tenaga Listrik = RGB(0, 255, 205)
+10. Kawasan Perikanan Budi Daya = RGB(130, 185, 210)
+11. Kawasan Perkebunan = RGB(175, 175, 55)
+12. Kawasan Perlindungan Setempat = RGB(5, 215, 215)
+13. Kawasan Permukiman Perdesaan = RGB(255, 235, 156)
+14. Kawasan Permukiman Perkotaan = RGB(255, 214, 0)
+15. Kawasan Pertahanan dan Keamanan = RGB(155, 0, 255)
+16. Kawasan Peruntukan Industri = RGB(105, 0, 0)
+17. Kawasan Peruntukan Pertambangan Batuan = RGB(95, 115, 145)
+18. Kawasan Peternakan = RGB(185, 235, 185)
+19. Kawasan Taman Buru = RGB(70, 150, 255)
+20. Kawasan Tanaman Pangan = RGB(200, 245, 70)
+21. Kawasan Transportasi = Kode RGB(215, 55, 0)
+22. Taman Hutan Raya = RGB:(185, 165, 255)
+23. Taman Wisata Alam = RGB(210, 190, 255)
+
+* WARNA INFRASTRUKTUR JALAN_SIPERA
+1. Jalan Arteri Primer = RGB:(255, 81, 0) - Ukuran: Inner 3pt, Outline 4pt
+2. Jalan Arteri Sekunder = RGB:(255, 81, 0) - Ukuran: Inner 1.8pt, Outline 2.8pt
+3. Jalan Khusus = RGB:(78, 78, 78) - Ukuran: Line 0.5pt
+4. Jalan Kolektor Primer = RGB:(255, 140, 0) - Ukuran: Line 3pt
+5. Jalan Kolektor Sekunder = RGB:(255, 200, 0) - Ukuran: Line 1.8pt
+6. Jalan Lokal Primer = RGB:(155, 90, 255) - Ukuran: Line 1.7pt
+7. Jalan Lokal Sekunder = RGB:(178, 178, 255) - Ukuran: Line 1.5pt
+8. Jalan Tol = RGB:(245, 0, 0) - Ukuran: Inner 1.8pt, Outline 3pt
+9. Jaringan Jalur Kereta Api Antarkota = RGB:(0, 0, 0) - Ukuran: Line horizontal 0.8pt, vertikal 5pt
+10. Jaringan Jalur Kereta Api Perkotaan = RGB:(255, 150, 0) - Ukuran: Line horizontal atas dan bawah 0.8pt, vertikal 5pt
+
+* WARNA INFRASTRUKTUR ENERGI (LISTRIK & MIGAS)
+1. Saluran Udara Tegangan Ekstra Tinggi (SUTET) = RGB(255, 150, 0) - Ukuran: Line 4pt
+2. Saluran Udara Tegangan Tinggi (SUTT) = RGB(255, 150, 0) - Ukuran: Line 4pt
+3. Saluran Udara Tegangan Menengah (SUTM) = RGB(255, 210, 30) - Ukuran: Line 2pt
+4. Pipa Transmisi Minyak dan Gas Bumi = RGB(0, 168, 132) - Ukuran: Line 4pt
+
+* WARNA INFRASTRUKTUR SUMBER DAYA AIR
+1. Jaringan Irigasi Primer = RGB(0, 76, 168) - Ukuran: Horizontal 1.4pt, Vertikal 6pt
+2. Jaringan Irigasi Sekunder = RGB(255, 0, 0) - Ukuran: Horizontal 1.2pt, Vertikal 6pt
+3. Jaringan Pengendalian Banjir = RGB(0, 77, 168) - Ukuran: Line 1pt
+
+* Batas Administrasi = RGB(0, 0, 0) - Ketebalan: 1.5 - 2.5pt (Garis Putus-putus)
+

@@ -38,8 +38,17 @@ sipera/
 │   ├── grafana/            Dashboards
 │   ├── prometheus/         Alert rules
 │   └── k6/                 Load test scripts
+├── data/                   Data GIS RDTR Kab. Bandung (geojson/pdf/mxd) — git-ignored
+├── reference/              Source vendor lama (obfuscated) — referensi, git-ignored
 └── docs/                   ADRs, runbooks, architecture
 ```
+
+## Data & Reference Assets
+
+Aset eksternal (data GIS + source vendor lama) di-merge dari drive "New Volume" — lihat [docs/MERGED-ASSETS.md](docs/MERGED-ASSETS.md) untuk manifest, provenance, dan cara pakainya. Keduanya git-ignored (±555 MB).
+
+- `data/zonasi-pola-ruang/` — geojson Pola Ruang / Batas Kecamatan / Jaringan Jalan / Utilitas Kab. Bandung, kandidat impor ke `rdtr_poly` (PostGIS) menggantikan `MOCK_ZONA` di `apps/spatial`.
+- `reference/legacy-vendor-obfuscated/` — paket source vendor "geoportal" (NestJS, obfuscated). Sumber `schema.prisma` 29-model yang jadi basis data model rebuild.
 
 ## Quickstart
 
