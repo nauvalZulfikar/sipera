@@ -35,3 +35,17 @@ Sumber: `sipera-source-obfuscated-20260512-144055/`. Paket source **sistem vendo
 - **Artefak yang masih kebaca:** `backend/prisma/schema.prisma` (29 model — sumber data model rebuild), migrations (Agt 2024→Jul 2025), docs GeoServer/layer, `.env.example`.
 
 > Screenshot 1.022 file obfuscated (backend + app-code) ada di tablet `my-personal-tab`: `~/sipera-obfuscated-screenshots/` & `/sdcard/Download/sipera-obfuscated-screenshots/`.
+
+---
+
+## 3. `data/shapefiles/` — Shapefile Esri (5.7 MB) — ditambah 2026-06-18
+
+Dikumpulkan dari semua `.shp` yang ada di Mac Mini (satu-satunya: dari `SIBEDAS/tmp/batas/`).
+
+| Shapefile                                      | Geom         | Isi                                 | Sidecar                                                        |
+| ---------------------------------------------- | ------------ | ----------------------------------- | -------------------------------------------------------------- |
+| `BATAS_KECAMATAN_DESA/BATAS_KECAMATAN_DESA_AR` | Polygon (AR) | Batas administrasi kecamatan & desa | `.shp .shx .dbf .prj .CPG .sbn .sbx .shp.xml` (8 file lengkap) |
+
+- **CRS:** `GCS_WGS_1984` (EPSG:4326), vertikal EGM2008 — sama dengan geojson Pola Ruang, aman dipakai bareng.
+- **Pemakaian:** kandidat batas admin presisi untuk `apps/spatial` (alternatif/validasi vs `Batas Administrasi_Kec_sipera.json`).
+- Binari berat (`.shp/.shx/.dbf/.sbn/.sbx`) **git-ignored**; `.prj/.CPG/.shp.xml` (kecil, metadata) tetap tracked.

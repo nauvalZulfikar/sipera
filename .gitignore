@@ -45,3 +45,9 @@ graphify-out/
 /data/zonasi-pola-ruang/Geojson_SIPERA/*.json
 /data/zonasi-pola-ruang/Geojson_SIPERA/*.mxd
 /data/zonasi-pola-ruang/Geojson_SIPERA/*.pdf
+# Shapefiles (2026-06-18) — heavy binaries ignored; small .prj/.CPG/.shp.xml metadata kept tracked
+/data/shapefiles/**/*.shp
+/data/shapefiles/**/*.shx
+/data/shapefiles/**/*.dbf
+/data/shapefiles/**/*.sbn
+/data/shapefiles/**/*.sbx
